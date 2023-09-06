@@ -36,46 +36,7 @@ public class NettyClient {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         System.out.println(getThreadName() + "init client socket: " + ch);
-                        ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
-                            @Override
-                            public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                                System.out.println(getThreadName() + "channelActive-" + "client write login_request");
-
-                                // 编写 LoginRequestPacket
-                                LoginRequestPacket packet = new LoginRequestPacket();
-                                packet.setUserId(new Random().nextInt(Integer.MAX_VALUE));
-                                packet.setUsername("闪电侠");
-                                packet.setPassword("flash-man");
-
-                                // 获取 ByteBuf from ChannelHandlerContext
-                                ByteBuf byteBuf = ctx.alloc().ioBuffer();
-
-                                PacketCodeC.encode(byteBuf, packet);
-
-                                // 发送登录请求
-                                ctx.channel().writeAndFlush(byteBuf);
-                            }
-
-                            @Override
-                            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                                ByteBuf respByteBuf = (ByteBuf) msg;
-                                Packet packet = PacketCodeC.decode(respByteBuf);
-                                if (packet instanceof LoginResponsePacket) {
-                                    LoginResponsePacket loginResponsePacket = (LoginResponsePacket) packet;
-                                    if (loginResponsePacket.isSuccess()) {
-                                        System.out.println(getThreadName() + "login success, " + loginResponsePacket);
-                                        LoginUtil.markAsLogin(ctx.channel());
-                                    } else {
-                                        System.out.println(getThreadName() + "login failed, " + loginResponsePacket);
-                                    }
-                                } else if (packet instanceof MessageResponsePacket) {
-                                    MessageResponsePacket msgRespPacket = (MessageResponsePacket) packet;
-                                    System.out.println(getThreadName() + "收到服务端的消息: " + msgRespPacket.getMessage());
-                                }
-
-                                respByteBuf.release();
-                            }
-                        });
+                        ch.pipeline().addLast(new ClientChannelInboundHandler());
                     }
                 });
 
@@ -117,7 +78,6 @@ public class NettyClient {
                     System.out.println("请输入消息发送至服务端: ");
                     Scanner sc = new Scanner(System.in);
                     String line = sc.nextLine();
-
 
                     // 构造 MessageRequestPacket 数据包
                     MessageRequestPacket packet = new MessageRequestPacket();
