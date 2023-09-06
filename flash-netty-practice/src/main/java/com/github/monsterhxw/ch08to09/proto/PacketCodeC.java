@@ -1,6 +1,6 @@
-package com.github.monsterhxw.ch08.proto;
+package com.github.monsterhxw.ch08to09.proto;
 
-import com.github.monsterhxw.ch08.seri.Serializer;
+import com.github.monsterhxw.ch08to09.seri.Serializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 
@@ -22,14 +22,22 @@ public class PacketCodeC {
     static {
         PACKET_TYPE_MAP = new HashMap<>();
         PACKET_TYPE_MAP.put(Command.LOGIN_REQUEST, LoginRequestPacket.class);
+        PACKET_TYPE_MAP.put(Command.LOGIN_RESPONSE, LoginResponsePacket.class);
 
         SERIALIZER_MAP = new HashMap<>();
         SERIALIZER_MAP.put(Serializer.DEFAULT.getSerializerAlgorithm(), Serializer.DEFAULT);
     }
 
     public static ByteBuf encode(Packet packet) {
-        // 创建 ByteBuf 对象
-        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.ioBuffer();
+        return encode(null, packet);
+    }
+
+    public static ByteBuf encode(ByteBuf byteBuf, Packet packet) {
+        if (byteBuf == null) {
+            // 创建 ByteBuf 对象
+            byteBuf = ByteBufAllocator.DEFAULT.ioBuffer();
+        }
+
         // 封装协议
         return encapsulateProto(byteBuf, packet);
     }

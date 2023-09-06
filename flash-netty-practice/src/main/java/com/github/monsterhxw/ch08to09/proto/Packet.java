@@ -1,4 +1,4 @@
-package com.github.monsterhxw.ch08.proto;
+package com.github.monsterhxw.ch08to09.proto;
 
 /**
  * @author huangxuewei

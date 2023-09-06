@@ -1,4 +1,4 @@
-package com.github.monsterhxw.ch08.proto;
+package com.github.monsterhxw.ch08to09.proto;
 
 /**
  * @author huangxuewei
@@ -7,4 +7,6 @@ package com.github.monsterhxw.ch08.proto;
 public interface Command {
 
     byte LOGIN_REQUEST = 1;
+
+    byte LOGIN_RESPONSE = 2;
 }
