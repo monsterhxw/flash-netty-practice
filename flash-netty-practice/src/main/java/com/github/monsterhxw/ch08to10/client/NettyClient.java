@@ -1,14 +1,10 @@
-package com.github.monsterhxw.ch08to09.client;
+package com.github.monsterhxw.ch08to10.client;
 
-import com.github.monsterhxw.ch08to09.proto.LoginRequestPacket;
-import com.github.monsterhxw.ch08to09.proto.LoginResponsePacket;
-import com.github.monsterhxw.ch08to09.proto.Packet;
-import com.github.monsterhxw.ch08to09.proto.PacketCodeC;
+import com.github.monsterhxw.ch08to10.proto.*;
+import com.github.monsterhxw.ch08to10.util.LoginUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -16,6 +12,7 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 
 import java.util.Random;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -67,10 +64,15 @@ public class NettyClient {
                                     LoginResponsePacket loginResponsePacket = (LoginResponsePacket) packet;
                                     if (loginResponsePacket.isSuccess()) {
                                         System.out.println(getThreadName() + "login success, " + loginResponsePacket);
+                                        LoginUtil.markAsLogin(ctx.channel());
                                     } else {
                                         System.out.println(getThreadName() + "login failed, " + loginResponsePacket);
                                     }
+                                } else if (packet instanceof MessageResponsePacket) {
+                                    MessageResponsePacket msgRespPacket = (MessageResponsePacket) packet;
+                                    System.out.println(getThreadName() + "收到服务端的消息: " + msgRespPacket.getMessage());
                                 }
+
                                 respByteBuf.release();
                             }
                         });
@@ -89,6 +91,8 @@ public class NettyClient {
                         boolean success = future.isSuccess();
                         if (success) {
                             System.out.println(getThreadName() + " connect " + port + " success!");
+                            Channel channel = ((ChannelFuture) future).channel();
+                            startConsoleThread(bootstrap, channel);
                         } else {
                             int order = (MAX_RETRY - retry) + 1;
                             if (order <= MAX_RETRY) {
@@ -104,6 +108,35 @@ public class NettyClient {
                         }
                     }
                 });
+    }
+
+    private static void startConsoleThread(final Bootstrap bootstrap, final Channel channel) {
+        new Thread(() -> {
+            while (!Thread.interrupted()) {
+                if (LoginUtil.isLogin(channel)) {
+                    System.out.println("请输入消息发送至服务端: ");
+                    Scanner sc = new Scanner(System.in);
+                    String line = sc.nextLine();
+
+
+                    // 构造 MessageRequestPacket 数据包
+                    MessageRequestPacket packet = new MessageRequestPacket();
+                    packet.setMessage(line);
+
+                    // 进行编码
+                    ByteBuf byteBuf = channel.alloc().ioBuffer();
+                    byteBuf = PacketCodeC.encode(byteBuf, packet);
+
+                    // 发送消息
+                    channel.writeAndFlush(byteBuf);
+
+                    if (line.equals("exit")) {
+                        bootstrap.group().shutdownGracefully();
+                        break;
+                    }
+                }
+            }
+        }).start();
     }
 
     private static String getThreadName() {

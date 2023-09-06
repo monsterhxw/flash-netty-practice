@@ -1,9 +1,6 @@
-package com.github.monsterhxw.ch08to09.server;
+package com.github.monsterhxw.ch08to10.server;
 
-import com.github.monsterhxw.ch08to09.proto.LoginRequestPacket;
-import com.github.monsterhxw.ch08to09.proto.LoginResponsePacket;
-import com.github.monsterhxw.ch08to09.proto.Packet;
-import com.github.monsterhxw.ch08to09.proto.PacketCodeC;
+import com.github.monsterhxw.ch08to10.proto.*;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -68,8 +65,32 @@ public class NettyServer {
                                             respByteBuf = PacketCodeC.encode(respByteBuf, loginResponsePacket);
                                             ctx.channel().writeAndFlush(respByteBuf);
 
-                                            reqByteBuf.release();
+                                        } else if (packet instanceof MessageRequestPacket) {
+                                            // 处理消息
+                                            MessageRequestPacket msgReqPacket = (MessageRequestPacket) packet;
+                                            System.out.println(getThreadName() + "收到客户端消息: " + msgReqPacket.getMessage());
+
+                                            if (msgReqPacket.getMessage().equals("exit")) {
+                                                ctx.channel().close();
+                                                bossGroup.shutdownGracefully();
+                                                workerGroup.shutdownGracefully();
+                                                reqByteBuf.release();
+                                                return;
+                                            }
+
+                                            // 响应
+                                            MessageResponsePacket msgRespPacket = new MessageResponsePacket();
+                                            msgRespPacket.setMessage("服务端 Echo: 【" + msgReqPacket.getMessage() + "】");
+
+                                            // 进行编码
+                                            ByteBuf respByteBuf = ctx.alloc().ioBuffer();
+                                            respByteBuf = PacketCodeC.encode(respByteBuf, msgRespPacket);
+
+                                            // 发送消息
+                                            ctx.channel().writeAndFlush(respByteBuf);
                                         }
+
+                                        reqByteBuf.release();
                                     }
                                 });
                     }

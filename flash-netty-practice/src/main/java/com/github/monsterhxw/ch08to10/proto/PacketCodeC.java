@@ -1,6 +1,6 @@
-package com.github.monsterhxw.ch08to09.proto;
+package com.github.monsterhxw.ch08to10.proto;
 
-import com.github.monsterhxw.ch08to09.seri.Serializer;
+import com.github.monsterhxw.ch08to10.seri.Serializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 
@@ -23,6 +23,8 @@ public class PacketCodeC {
         PACKET_TYPE_MAP = new HashMap<>();
         PACKET_TYPE_MAP.put(Command.LOGIN_REQUEST, LoginRequestPacket.class);
         PACKET_TYPE_MAP.put(Command.LOGIN_RESPONSE, LoginResponsePacket.class);
+        PACKET_TYPE_MAP.put(Command.MESSAGE_REQUEST, MessageRequestPacket.class);
+        PACKET_TYPE_MAP.put(Command.MESSAGE_RESPONSE, MessageResponsePacket.class);
 
         SERIALIZER_MAP = new HashMap<>();
         SERIALIZER_MAP.put(Serializer.DEFAULT.getSerializerAlgorithm(), Serializer.DEFAULT);

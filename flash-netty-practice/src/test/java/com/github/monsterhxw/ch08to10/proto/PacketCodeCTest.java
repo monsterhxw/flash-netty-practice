@@ -1,7 +1,7 @@
-package com.github.monsterhxw.ch08to09.proto;
+package com.github.monsterhxw.ch08to10.proto;
 
-import com.github.monsterhxw.ch08to09.seri.JsonSerializer;
-import com.github.monsterhxw.ch08to09.seri.Serializer;
+import com.github.monsterhxw.ch08to10.seri.JsonSerializer;
+import com.github.monsterhxw.ch08to10.seri.Serializer;
 import io.netty.buffer.ByteBuf;
 import org.junit.Assert;
 import org.junit.Test;

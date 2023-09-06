@@ -1,4 +1,4 @@
-package com.github.monsterhxw.ch08to09.seri;
+package com.github.monsterhxw.ch08to10.seri;
 
 /**
  * @author huangxuewei
