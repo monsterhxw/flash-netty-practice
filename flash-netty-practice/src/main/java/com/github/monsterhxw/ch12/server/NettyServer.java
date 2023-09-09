@@ -30,8 +30,8 @@ public class NettyServer {
                 .group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 1024)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .option(ChannelOption.TCP_NODELAY, true)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childOption(ChannelOption.TCP_NODELAY, true)
                 .handler(new ChannelInitializer<ServerSocketChannel>() {
                     @Override
                     protected void initChannel(ServerSocketChannel ch) throws Exception {
